@@ -445,6 +445,7 @@ class SchemaTester:
         case_tester: Callable[[str], None] | None = None,
         ignore_case: list[str] | None = None,
         validators: list[Callable[[dict[str, Any], Any], str | None]] | None = None,
+        response_schema: dict[str, Any] | None = None,
     ) -> None:
         """
         Verifies that an OpenAPI schema definition matches an API response.
@@ -453,11 +454,16 @@ class SchemaTester:
         :param case_tester: Optional Callable that checks a string's casing
         :param ignore_case: Optional list of keys to ignore in case testing
         :param validators: Optional list of validator functions
+        :param response_schema: Optional schema section to override the default one.
         :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API
             response and schema.
         :raises: ``openapi_tester.exceptions.CaseError`` for case errors.
         """
-        response_schema = self.get_response_schema_section(response)
+        response_schema = (
+            response_schema
+            if response_schema is not None
+            else self.get_response_schema_section(response)
+        )
         self.test_schema_section(
             schema_section=response_schema,
             data=response.json() if response.data is not None else {},  # type: ignore

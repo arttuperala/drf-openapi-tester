@@ -292,6 +292,29 @@ def test_validate_response_passed_in_ignored_case(client):
     )
 
 
+def test_validate_response_override_schema_section(client):
+    """Allow overriding schema used by SchemaTester.validate_response()."""
+    custom_response_schema = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string", "maxLength": 254},
+                "color": {"type": "string", "maxLength": 254},
+                "height": {"type": "string", "maxLength": 254},
+                "width": {"type": "string", "maxLength": 254},
+                "length": {"type": "string", "maxLength": 254},
+            },
+            "required": ["name"],
+        },
+    }
+    for item in bad_test_data:
+        response = client.get(item["url"])
+        assert response.status_code == 200
+        assert response.json() == item["expected_response"]
+        tester.validate_response(response, response_schema=custom_response_schema)
+
+
 def test_nullable_validation():
     for schema in example_schema_types:
         # A null value should always raise an error
