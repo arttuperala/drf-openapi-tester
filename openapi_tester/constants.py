@@ -43,9 +43,6 @@ VALIDATE_MAXIMUM_NUMBER_OF_PROPERTIES_ERROR = (
 )
 VALIDATE_UNIQUE_ITEMS_ERROR = "The array {data} must contain unique items only"
 VALIDATE_NONE_ERROR = "Received a null value for a non-nullable schema object"
-VALIDATE_MISSING_RESPONSE_KEY_ERROR = (
-    'The following property is missing in the response data: "{missing_key}"'
-)
 VALIDATE_EXCESS_RESPONSE_KEY_ERROR = (
     "The following property was found in the response, but is missing "
     'from the schema definition: "{excess_key}"'

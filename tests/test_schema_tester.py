@@ -21,12 +21,16 @@ from openapi_tester.constants import (
     INIT_ERROR,
     OPENAPI_PYTHON_MAPPING,
     VALIDATE_EXCESS_RESPONSE_KEY_ERROR,
-    VALIDATE_MISSING_RESPONSE_KEY_ERROR,
     VALIDATE_NONE_ERROR,
     VALIDATE_ONE_OF_ERROR,
     VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR,
 )
-from openapi_tester.exceptions import CaseError, DocumentationError, UndocumentedSchemaSectionError
+from openapi_tester.exceptions import (
+    CaseError,
+    DocumentationError,
+    MissingKeyError,
+    UndocumentedSchemaSectionError,
+)
 from openapi_tester.loaders import UrlStaticSchemaLoader
 from test_project.models import Names
 from tests import example_object, example_schema_types
@@ -34,6 +38,10 @@ from tests.utils import TEST_ROOT, iterate_schema, mock_schema, response_factory
 
 if TYPE_CHECKING:
     from typing import Any
+
+VALIDATE_MISSING_RESPONSE_KEY_ERROR = (
+    'The following property is missing in the response data: "{missing_key}"'
+)
 
 tester = SchemaTester()
 name_id = 1234567890
@@ -440,7 +448,7 @@ def test_missing_keys_validation():
         "required": ["value"],
     }
     with pytest.raises(
-        DocumentationError, match=VALIDATE_MISSING_RESPONSE_KEY_ERROR.format(missing_key="value")
+        MissingKeyError, match=VALIDATE_MISSING_RESPONSE_KEY_ERROR.format(missing_key="value")
     ):
         tester.test_schema_section(required_key, {})
 

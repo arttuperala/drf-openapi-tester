@@ -15,13 +15,13 @@ from openapi_tester.constants import (
     UNDOCUMENTED_SCHEMA_SECTION_ERROR,
     VALIDATE_ANY_OF_ERROR,
     VALIDATE_EXCESS_RESPONSE_KEY_ERROR,
-    VALIDATE_MISSING_RESPONSE_KEY_ERROR,
     VALIDATE_NONE_ERROR,
     VALIDATE_ONE_OF_ERROR,
     VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR,
 )
 from openapi_tester.exceptions import (
     DocumentationError,
+    MissingKeyError,
     OpenAPISchemaError,
     UndocumentedSchemaSectionError,
 )
@@ -392,12 +392,7 @@ class SchemaTester:
         for key in properties:
             self.test_key_casing(key, case_tester, ignore_case)
             if key in required_keys and key not in response_keys:
-                raise DocumentationError(
-                    f"{VALIDATE_MISSING_RESPONSE_KEY_ERROR.format(missing_key=key)}"
-                    f"\n\nReference: {reference}."
-                    f"object:key:{key}\n\nHint: Remove the key from your"
-                    " OpenAPI docs, or include it in your API response"
-                )
+                raise MissingKeyError(key, reference)
         for key in response_keys:
             self.test_key_casing(key, case_tester, ignore_case)
             if key not in properties and not additional_properties_allowed:

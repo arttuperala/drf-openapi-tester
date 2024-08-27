@@ -14,6 +14,18 @@ class CaseError(DocumentationError):
         )
 
 
+class MissingKeyError(DocumentationError):
+    """Custom exception raised when properties are missing from response."""
+
+    def __init__(self, missing_key: str, reference: str = "init"):
+        self.key = missing_key
+        super().__init__(
+            f'The following property is missing in the response data: "{self.key}"\n\n'
+            f"Reference: {reference}.object:key:{self.key}\n\n"
+            f"Hint: Remove the key from your OpenAPI docs, or include it in your API response"
+        )
+
+
 class OpenAPISchemaError(Exception):
     """Custom exception raised for invalid schema specifications."""
 
