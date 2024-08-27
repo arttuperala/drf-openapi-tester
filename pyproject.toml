@@ -1,6 +1,6 @@
 [project]
 name = "drf-openapi-tester"
-version = "2.3.3"
+version = "2.4.0"
 description = "Test utility for validating OpenAPI response documentation"
 dependencies = [
     "django >=3,<4 ; python_version <= '3.7'",
