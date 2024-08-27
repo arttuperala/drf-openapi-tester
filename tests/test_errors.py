@@ -22,7 +22,10 @@ from openapi_tester.validators import (
 
 def test_case_error_message():
     error = CaseError(key="test-key", case="camelCase", expected="testKey")
-    assert error.args[0].strip() == "The response key `test-key` is not properly camelCase. Expected value: testKey"
+    assert (
+        error.args[0].strip()
+        == "The response key `test-key` is not properly camelCase. Expected value: testKey"
+    )
 
 
 class TestValidatorErrors:
@@ -30,13 +33,15 @@ class TestValidatorErrors:
 
     def test_validate_min_properties_error(self):
         message = validate_min_properties({"minProperties": 2}, {})
-        assert message == "The number of properties in {} is fewer than the specified minimum number of properties of 2"
+        assert (
+            message == "The number of properties in {} is fewer than the specified "
+            "minimum number of properties of 2"
+        )
 
     def test_validate_max_properties_error(self):
         message = validate_max_properties({"maxProperties": 1}, {"one": 1, "two": 2})
         assert (
-            message
-            == "The number of properties in {'one': 1, 'two': 2} exceeds the"
+            message == "The number of properties in {'one': 1, 'two': 2} exceeds the"
             " specified maximum number of properties of 1"
         )
 
@@ -46,7 +51,10 @@ class TestValidatorErrors:
 
     def test_validate_min_items_error(self):
         message = validate_min_items({"minItems": 1}, [])
-        assert message == "The length of the array [] is shorter than the specified minimum length of 1"
+        assert (
+            message
+            == "The length of the array [] is shorter than the specified minimum length of 1"
+        )
 
     def test_validate_max_length_error(self):
         message = validate_max_length({"maxLength": 1}, "test")
@@ -113,7 +121,10 @@ class TestValidatorErrors:
         ]
         for schema, data in d:
             message = validate_format(schema, data)
-            assert message == f'''Expected: a "{schema['format']}" formatted value\n\nReceived: "{data}"'''
+            assert (
+                message
+                == f'''Expected: a "{schema['format']}" formatted value\n\nReceived: "{data}"'''
+            )
 
     def test_validate_type_error(self):
         # string
@@ -159,24 +170,30 @@ class TestTestOpenAPIObjectErrors:
         tester = SchemaTester()
         with pytest.raises(DocumentationError, match=expected_error_message):
             tester.test_openapi_object(
-                {"required": ["one"], "properties": {"one": {"type": "int"}}}, {"two": 2}, reference="init"
+                {"required": ["one"], "properties": {"one": {"type": "int"}}},
+                {"two": 2},
+                reference="init",
             )
 
     def test_missing_schema_key_error(self):
         expected_error_message = (
-            'The following property was found in the response, but is missing from the schema definition: "two"\n\n'
+            "The following property was found in the response, "
+            'but is missing from the schema definition: "two"\n\n'
             "Reference: init.object:key:two\n\n"
             "Hint: Remove the key from your API response, or include it in your OpenAPI docs"
         )
         tester = SchemaTester()
         with pytest.raises(DocumentationError, match=expected_error_message):
             tester.test_openapi_object(
-                {"required": ["one"], "properties": {"one": {"type": "int"}}}, {"one": 1, "two": 2}, reference="init"
+                {"required": ["one"], "properties": {"one": {"type": "int"}}},
+                {"one": 1, "two": 2},
+                reference="init",
             )
 
     def test_key_in_write_only_properties_error(self):
         expected_error_message = (
-            'The following property was found in the response, but is documented as being "writeOnly": "one"\n\n'
+            "The following property was found in the response, but is "
+            'documented as being "writeOnly": "one"\n\n'
             "Reference: init.object:key:one\n\n"
             'Hint: Remove the key from your API response, or remove the "WriteOnly" restriction'
         )
@@ -202,8 +219,8 @@ def test_null_error():
 
 def test_any_of_error():
     expected_error_message = (
-        "Expected data to match one or more of the documented anyOf schema types, but found no matches\n\n"
-        "Reference: init.anyOf"
+        "Expected data to match one or more of the documented anyOf schema types, "
+        "but found no matches\n\nReference: init.anyOf"
     )
     tester = SchemaTester()
     with pytest.raises(DocumentationError, match=expected_error_message):
@@ -212,7 +229,8 @@ def test_any_of_error():
 
 def test_one_of_error():
     expected_error_message = (
-        "Expected data to match one and only one of the oneOf schema types; found 0 matches\n\nReference: init.oneOf"
+        "Expected data to match one and only one of the oneOf schema types; found 0 matches\n\n"
+        "Reference: init.oneOf"
     )
     tester = SchemaTester()
     with pytest.raises(DocumentationError, match=expected_error_message):

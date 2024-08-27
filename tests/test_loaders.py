@@ -41,7 +41,7 @@ def test_url_schema_loader():
         mocked_get_request.return_value = Mock(content=schema_content)
         loaded_schema = schema_loader.load_schema()
 
-    assert type(loaded_schema) == dict
+    assert isinstance(loaded_schema, dict)
     assert loaded_schema["openapi"] == "3.0.0"
     assert loaded_schema["info"]["title"] == "Swagger Petstore"
 
@@ -62,7 +62,8 @@ def test_loader_resolve_path(loader):
     assert loader.resolve_path("/api/v1/cars/correct", "get") is not None
 
     with pytest.raises(
-        ValueError, match="Could not resolve path `/api/v1/blars/correct`.\n\nDid you mean one of these?"
+        ValueError,
+        match="Could not resolve path `/api/v1/blars/correct`.\n\nDid you mean one of these?",
     ):
         loader.resolve_path("/api/v1/blars/correct", "get")
 

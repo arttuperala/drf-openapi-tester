@@ -1,4 +1,5 @@
-""" Schema Tester """
+"""Schema Tester"""
+
 from __future__ import annotations
 
 import re
@@ -19,7 +20,11 @@ from openapi_tester.constants import (
     VALIDATE_ONE_OF_ERROR,
     VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR,
 )
-from openapi_tester.exceptions import DocumentationError, OpenAPISchemaError, UndocumentedSchemaSectionError
+from openapi_tester.exceptions import (
+    DocumentationError,
+    OpenAPISchemaError,
+    UndocumentedSchemaSectionError,
+)
 from openapi_tester.loaders import (
     DrfSpectacularSchemaLoader,
     DrfYasgSchemaLoader,
@@ -53,7 +58,12 @@ if TYPE_CHECKING:
 class SchemaTester:
     """Schema Tester: this is the base class of the library."""
 
-    loader: StaticSchemaLoader | DrfSpectacularSchemaLoader | DrfYasgSchemaLoader | UrlStaticSchemaLoader
+    loader: (
+        StaticSchemaLoader
+        | DrfSpectacularSchemaLoader
+        | DrfYasgSchemaLoader
+        | UrlStaticSchemaLoader
+    )
     validators: list[Callable[[dict, Any], str | None]]
 
     def __init__(
@@ -64,12 +74,13 @@ class SchemaTester:
         validators: list[Callable[[dict, Any], str | None]] | None = None,
         field_key_map: dict[str, str] | None = None,
     ) -> None:
-        """
-        Iterates through an OpenAPI schema object and API response to check that they match at every level.
+        """Iterate through an OpenAPI schema object and API response to check that they match at
+        every level.
 
         :param case_tester: An optional callable that validates schema and response keys
         :param ignore_case: An optional list of keys for the case_tester to ignore
-        :schema_file_path: The file path to an OpenAPI yaml or json file. Only passed when using a static schema loader
+        :schema_file_path: The file path to an OpenAPI yaml or json file.
+            Only passed when using a static schema loader
         :raises: openapi_tester.exceptions.DocumentationError or ImproperlyConfigured
         """
         self.case_tester = case_tester
@@ -90,14 +101,16 @@ class SchemaTester:
             raise ImproperlyConfigured(INIT_ERROR)
 
     @staticmethod
-    def get_key_value(schema: dict[str, dict], key: str, error_addon: str = "", use_regex=False) -> dict:
+    def get_key_value(
+        schema: dict[str, dict], key: str, error_addon: str = "", use_regex=False
+    ) -> dict:
         """
         Returns the value of a given key
         """
         try:
             if use_regex:
                 compiled_pattern = re.compile(key)
-                for key_ in schema.keys():
+                for key_ in schema:
                     if compiled_pattern.match(key_):
                         return schema[key_]
             return schema[key]
@@ -107,7 +120,9 @@ class SchemaTester:
             ) from e
 
     @staticmethod
-    def get_status_code(schema: dict[str | int, dict], status_code: str | int, error_addon: str = "") -> dict:
+    def get_status_code(
+        schema: dict[str | int, dict], status_code: str | int, error_addon: str = ""
+    ) -> dict:
         """
         Returns the status code section of a schema, handles both str and int status codes
         """
@@ -128,8 +143,7 @@ class SchemaTester:
         return None
 
     def get_response_schema_section(self, response: Response) -> dict[str, Any]:
-        """
-        Fetches the response section of a schema, wrt. the route, method, status code, and schema version.
+        """Fetch the response section of a schema, wrt. the route, method, status code, and version.
 
         :param response: DRF Response Instance
         :return dict
@@ -137,14 +151,16 @@ class SchemaTester:
         schema = self.loader.get_schema()
         response_method = response.request["REQUEST_METHOD"].lower()  # type: ignore
         parameterized_path, _ = self.loader.resolve_path(
-            response.request["PATH_INFO"], method=response_method  # type: ignore
+            response.request["PATH_INFO"],  # type: ignore
+            method=response_method,
         )
         paths_object = self.get_key_value(schema, "paths")
 
         route_object = self.get_key_value(
             paths_object,
             parameterized_path,
-            f"\n\nUndocumented route {parameterized_path}.\n\nDocumented routes: " + "\n\t• ".join(paths_object.keys()),
+            f"\n\nUndocumented route {parameterized_path}.\n\nDocumented routes: "
+            + "\n\t• ".join(paths_object.keys()),
         )
 
         method_object = self.get_key_value(
@@ -152,7 +168,7 @@ class SchemaTester:
             response_method,
             (
                 f"\n\nUndocumented method: {response_method}.\n\nDocumented methods: "
-                f"{[method.lower() for method in route_object.keys() if method.lower() != 'parameters']}."
+                f"{[method.lower() for method in route_object if method.lower() != 'parameters']}."
             ),
         )
 
@@ -167,14 +183,16 @@ class SchemaTester:
         )
 
         if "openapi" not in schema:
-            # openapi 2.0, i.e. "swagger" has a different structure than openapi 3.0 status sub-schemas
+            # openapi 2.0, i.e. "swagger" has a different structure than
+            # openapi 3.0 status sub-schemas
             return self.get_key_value(status_code_object, "schema")
 
         if status_code_object.get("content"):
             content_object = self.get_key_value(
                 status_code_object,
                 "content",
-                f"\n\nNo content documented for method: {response_method}, path: {parameterized_path}",
+                f"\n\nNo content documented for method: {response_method}, "
+                f"path: {parameterized_path}",
             )
             json_object = self.get_key_value(
                 content_object,
@@ -192,7 +210,8 @@ class SchemaTester:
                 UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(
                     key="content",
                     error_addon=(
-                        f"\n\nNo `content` defined for this response: {response_method}, path: {parameterized_path}"
+                        f"\n\nNo `content` defined for this response: {response_method}, "
+                        f"path: {parameterized_path}"
                     ),
                 )
             )
@@ -203,7 +222,9 @@ class SchemaTester:
         passed_schema_section_formats = set()
         for option in schema_section["oneOf"]:
             try:
-                self.test_schema_section(schema_section=option, data=data, reference=f"{reference}.oneOf", **kwargs)
+                self.test_schema_section(
+                    schema_section=option, data=data, reference=f"{reference}.oneOf", **kwargs
+                )
                 matches += 1
                 passed_schema_section_formats.add(option.get("format"))
             except DocumentationError:
@@ -214,13 +235,17 @@ class SchemaTester:
             # will succeed twice where it used to succeed once.
             return
         if matches != 1:
-            raise DocumentationError(f"{VALIDATE_ONE_OF_ERROR.format(matches=matches)}\n\nReference: {reference}.oneOf")
+            raise DocumentationError(
+                f"{VALIDATE_ONE_OF_ERROR.format(matches=matches)}\n\nReference: {reference}.oneOf"
+            )
 
     def handle_any_of(self, schema_section: dict, data: Any, reference: str, **kwargs: Any) -> None:
         any_of: list[dict[str, Any]] = schema_section.get("anyOf", [])
         for schema in chain(any_of, lazy_combinations(any_of)):
             try:
-                self.test_schema_section(schema_section=schema, data=data, reference=f"{reference}.anyOf", **kwargs)
+                self.test_schema_section(
+                    schema_section=schema, data=data, reference=f"{reference}.anyOf", **kwargs
+                )
                 return
             except DocumentationError:
                 continue
@@ -291,10 +316,14 @@ class SchemaTester:
             )
         schema_section = normalize_schema_section(schema_section)
         if "oneOf" in schema_section:
-            self.handle_one_of(schema_section=schema_section, data=data, reference=reference, **kwargs)
+            self.handle_one_of(
+                schema_section=schema_section, data=data, reference=reference, **kwargs
+            )
             return
         if "anyOf" in schema_section:
-            self.handle_any_of(schema_section=schema_section, data=data, reference=reference, **kwargs)
+            self.handle_any_of(
+                schema_section=schema_section, data=data, reference=reference, **kwargs
+            )
             return
 
         schema_section_type = self.get_schema_type(schema_section)
@@ -327,9 +356,13 @@ class SchemaTester:
                 raise DocumentationError(f"\n\n{error}\n\nReference: {reference}")
 
         if schema_section_type == "object":
-            self.test_openapi_object(schema_section=schema_section, data=data, reference=reference, **kwargs)
+            self.test_openapi_object(
+                schema_section=schema_section, data=data, reference=reference, **kwargs
+            )
         elif schema_section_type == "array":
-            self.test_openapi_array(schema_section=schema_section, data=data, reference=reference, **kwargs)
+            self.test_openapi_array(
+                schema_section=schema_section, data=data, reference=reference, **kwargs
+            )
 
     def test_openapi_object(
         self,
@@ -347,18 +380,21 @@ class SchemaTester:
         """
 
         properties = schema_section.get("properties", {})
-        write_only_properties = [key for key in properties.keys() if properties[key].get("writeOnly")]
-        required_keys = [key for key in schema_section.get("required", []) if key not in write_only_properties]
+        write_only_properties = [key for key in properties if properties[key].get("writeOnly")]
+        required_keys = [
+            key for key in schema_section.get("required", []) if key not in write_only_properties
+        ]
         response_keys = data.keys()
         additional_properties: bool | dict | None = schema_section.get("additionalProperties")
         additional_properties_allowed = additional_properties is not None
         if additional_properties_allowed and not isinstance(additional_properties, (bool, dict)):
             raise OpenAPISchemaError("Invalid additionalProperties type")
-        for key in properties.keys():
+        for key in properties:
             self.test_key_casing(key, case_tester, ignore_case)
             if key in required_keys and key not in response_keys:
                 raise DocumentationError(
-                    f"{VALIDATE_MISSING_RESPONSE_KEY_ERROR.format(missing_key=key)}\n\nReference: {reference}."
+                    f"{VALIDATE_MISSING_RESPONSE_KEY_ERROR.format(missing_key=key)}"
+                    f"\n\nReference: {reference}."
                     f"object:key:{key}\n\nHint: Remove the key from your"
                     " OpenAPI docs, or include it in your API response"
                 )
@@ -366,13 +402,16 @@ class SchemaTester:
             self.test_key_casing(key, case_tester, ignore_case)
             if key not in properties and not additional_properties_allowed:
                 raise DocumentationError(
-                    f"{VALIDATE_EXCESS_RESPONSE_KEY_ERROR.format(excess_key=key)}\n\nReference: {reference}.object:key:"
-                    f"{key}\n\nHint: Remove the key from your API response, or include it in your OpenAPI docs"
+                    f"{VALIDATE_EXCESS_RESPONSE_KEY_ERROR.format(excess_key=key)}\n\n"
+                    f"Reference: {reference}.object:key:{key}\n\n"
+                    "Hint: Remove the key from your API response, "
+                    "or include it in your OpenAPI docs"
                 )
             if key in write_only_properties:
                 raise DocumentationError(
-                    f"{VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR.format(write_only_key=key)}\n\nReference: {reference}"
-                    f".object:key:{key}\n\nHint: Remove the key from your API response, or remove the "
+                    f"{VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR.format(write_only_key=key)}\n\n"
+                    f"Reference: {reference}.object:key:{key}\n\n"
+                    f"Hint: Remove the key from your API response, or remove the "
                     '"WriteOnly" restriction'
                 )
         for key, value in data.items():
@@ -393,7 +432,9 @@ class SchemaTester:
                     ignore_case=ignore_case,
                 )
 
-    def test_openapi_array(self, schema_section: dict[str, Any], data: dict, reference: str, **kwargs: Any) -> None:
+    def test_openapi_array(
+        self, schema_section: dict[str, Any], data: dict, reference: str, **kwargs: Any
+    ) -> None:
         for datum in data:
             self.test_schema_section(
                 # the items keyword is required in arrays
@@ -417,8 +458,9 @@ class SchemaTester:
         :param case_tester: Optional Callable that checks a string's casing
         :param ignore_case: Optional list of keys to ignore in case testing
         :param validators: Optional list of validator functions
-        :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API response and schema.
-                 ``openapi_tester.exceptions.CaseError`` for case errors.
+        :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API
+            response and schema.
+        :raises: ``openapi_tester.exceptions.CaseError`` for case errors.
         """
         response_schema = self.get_response_schema_section(response)
         self.test_schema_section(

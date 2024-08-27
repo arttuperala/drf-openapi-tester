@@ -10,7 +10,7 @@ from openapi_tester.exceptions import UndocumentedSchemaSectionError
 from openapi_tester.schema_tester import SchemaTester
 
 
-@pytest.fixture()
+@pytest.fixture
 def openapi_client(settings) -> OpenAPIClient:
     """Sample ``OpenAPIClient`` instance to use in tests."""
     # use `drf-yasg` schema loader in tests

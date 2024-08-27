@@ -1,4 +1,5 @@
-""" Loaders Module """
+"""Loaders Module"""
+
 from __future__ import annotations
 
 import difflib
@@ -13,7 +14,11 @@ import requests
 import yaml
 from django.urls import Resolver404, resolve
 from django.utils.functional import cached_property
-from openapi_spec_validator import openapi_v2_spec_validator, openapi_v30_spec_validator, openapi_v31_spec_validator
+from openapi_spec_validator import (
+    openapi_v2_spec_validator,
+    openapi_v30_spec_validator,
+    openapi_v31_spec_validator,
+)
 from prance.util.resolver import RefResolver
 from rest_framework.schemas.generators import BaseSchemaGenerator, EndpointEnumerator
 from rest_framework.settings import api_settings
@@ -47,11 +52,10 @@ def handle_recursion_limit(schema: dict) -> Callable:
 
 
 class BaseSchemaLoader:
-    """
-    Base class for OpenAPI schema loading classes.
+    """Base class for OpenAPI schema loading classes.
 
-    Contains a template of methods that are required from a loader class, and a range of helper methods for interacting
-    with an OpenAPI schema.
+    Contains a template of methods that are required from a loader class, and a range of helper
+    methods for interacting with an OpenAPI schema.
     """
 
     base_path = "/"
@@ -94,7 +98,9 @@ class BaseSchemaLoader:
         normalized_paths: dict[str, dict] = {}
         for key, value in schema["paths"].items():
             try:
-                parameterized_path, _ = self.resolve_path(endpoint_path=key, method=list(value.keys())[0])
+                parameterized_path, _ = self.resolve_path(
+                    endpoint_path=key, method=list(value.keys())[0]
+                )
                 normalized_paths[parameterized_path] = value
             except ValueError:
                 normalized_paths[key] = value
@@ -118,7 +124,9 @@ class BaseSchemaLoader:
                         )
                     )
             else:
-                raise UndocumentedSchemaSectionError(UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(key=schema["openapi"]))
+                raise UndocumentedSchemaSectionError(
+                    UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(key=schema["openapi"])
+                )
         else:
             validator = openapi_v2_spec_validator
         validator.validate(schema)
@@ -170,7 +178,9 @@ class BaseSchemaLoader:
         raise ValueError(message)
 
     @staticmethod
-    def handle_pk_parameter(resolved_route: ResolverMatch, path: str, method: str) -> tuple[str, ResolverMatch]:
+    def handle_pk_parameter(
+        resolved_route: ResolverMatch, path: str, method: str
+    ) -> tuple[str, ResolverMatch]:
         """
         Handle the DRF conversion of params called {pk} into a named parameter based on Model field
         """
@@ -178,7 +188,9 @@ class BaseSchemaLoader:
             path=path, method=method, view=cast("APIView", resolved_route.func)
         )
         pk_field_name = "".join(
-            entry.replace("+ ", "") for entry in difflib.Differ().compare(path, coerced_path) if "+ " in entry
+            entry.replace("+ ", "")
+            for entry in difflib.Differ().compare(path, coerced_path)
+            if "+ " in entry
         )
         resolved_route.kwargs[pk_field_name] = resolved_route.kwargs["pk"]
         del resolved_route.kwargs["pk"]
@@ -205,7 +217,9 @@ class DrfYasgSchemaLoader(BaseSchemaLoader):
         return cast("dict", loads(dumps(odict_schema.as_odict())))
 
     def resolve_path(self, endpoint_path: str, method: str) -> tuple[str, ResolverMatch]:
-        de_parameterized_path, resolved_path = super().resolve_path(endpoint_path=endpoint_path, method=method)
+        de_parameterized_path, resolved_path = super().resolve_path(
+            endpoint_path=endpoint_path, method=method
+        )
         path_prefix = self.schema_generator.determine_path_prefix(self.endpoints)
         trim_length = len(path_prefix) if path_prefix != "/" else 0
         return de_parameterized_path[trim_length:], resolved_path
@@ -231,7 +245,9 @@ class DrfSpectacularSchemaLoader(BaseSchemaLoader):
     def resolve_path(self, endpoint_path: str, method: str) -> tuple[str, ResolverMatch]:
         from drf_spectacular.settings import spectacular_settings
 
-        de_parameterized_path, resolved_path = super().resolve_path(endpoint_path=endpoint_path, method=method)
+        de_parameterized_path, resolved_path = super().resolve_path(
+            endpoint_path=endpoint_path, method=method
+        )
         return (
             de_parameterized_path[len(spectacular_settings.SCHEMA_PATH_PREFIX or "") :],
             resolved_path,
@@ -257,7 +273,10 @@ class StaticSchemaLoader(BaseSchemaLoader):
         with open(self.path, encoding="utf-8") as file:
             content = file.read()
             return cast(
-                "dict", json.loads(content) if ".json" in self.path else yaml.load(content, Loader=yaml.FullLoader)
+                "dict",
+                json.loads(content)
+                if ".json" in self.path
+                else yaml.load(content, Loader=yaml.FullLoader),
             )
 
 

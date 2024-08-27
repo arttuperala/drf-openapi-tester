@@ -31,7 +31,10 @@ api_urlpatterns = [
     path("api/<str:version>/exempt-endpoint", Exempt.as_view()),
     path("api/<str:version>/<str:pk>/names", NamesRetrieveView.as_view()),
     path("api/<str:version>/empty-names", EmptyNameViewSet.as_view({"get": "list"})),
-    path("api/<str:version>/categories/<int:category_pk>/subcategories/<int:subcategory_pk>/", Products.as_view()),
+    path(
+        "api/<str:version>/categories/<int:category_pk>/subcategories/<int:subcategory_pk>/",
+        Products.as_view(),
+    ),
     path("api/<str:version>/snake-case/", SnakeCasedResponse.as_view()),
     # ^trailing slash is here on purpose
     path("api/<str:version>/router_generated/", include(router.urls)),
