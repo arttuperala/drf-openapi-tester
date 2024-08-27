@@ -1,112 +1,68 @@
-[tool.poetry]
+[project]
 name = "drf-openapi-tester"
 version = "2.3.3"
 description = "Test utility for validating OpenAPI response documentation"
-authors = ["Sondre Lillebø Gundersen <sondrelg@live.no>", "Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
-license = "BSD-4-Clause"
+dependencies = [
+    "django >=3,<4 ; python_version <= '3.7'",
+    "django >=3,<5 ; python_version >= '3.8'",
+    "djangorestframework",
+    "inflection",
+    "openapi-spec-validator >=0.4",
+    "prance",
+    "pyYAML",
+]
+requires-python = ">= 3.7"
+authors = [
+    { name = "Sondre Lillebø Gundersen", email = "sondrelg@live.no" },
+    { name = "Na'aman Hirschfeld", email = "nhirschfeld@gmail.com" },
+]
+license = {file = "LICENSE"}
 readme = "README.md"
-homepage = "https://github.com/snok/drf-openapi-tester"
-repository = "https://github.com/snok/drf-openapi-tester"
-documentation = "https://github.com/snok/drf-openapi-tester"
 keywords = ["openapi", "swagger", "api", "testing", "schema", "django", "drf"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
+    "Framework :: Django :: 3.0",
+    "Framework :: Django :: 3.1",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
+    "Framework :: Django",
+    "Framework :: Pytest",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Framework :: Django",
-    'Framework :: Django :: 3.0',
-    'Framework :: Django :: 3.1',
-    'Framework :: Django :: 3.2',
-    'Framework :: Django :: 4.0',
-    'Framework :: Django :: 4.1',
-    "Framework :: Pytest",
-    "Topic :: Software Development",
-    "Topic :: Software Development :: Libraries",
+    "Programming Language :: Python",
+    "Topic :: Documentation",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: Documentation",
-    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Testing :: Unit",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development",
     "Topic :: Utilities",
     "Typing :: Typed",
 ]
-include = ["CHANGELOG.md"]
-packages = [
-    { include = "openapi_tester" },
-]
 
-[tool.poetry.dependencies]
-python = "^3.7"
-django = [
-    { version = '^3', python = '<=3.7' },
-    { version = '^3 || ^4', python = '>=3.8' },
-]
-djangorestframework = "*"
-inflection = "*"
-openapi-spec-validator = ">=0.4"
-prance = "*"
-pyYAML = "*"
-drf-spectacular = { version = "*", optional = true }
-drf-yasg = { version = "*", optional = true }
-
-[tool.poetry.extras]
-drf-yasg = ["drf-yasg"]
+[project.optional-dependencies]
+drf-yasg = ["drf-yasg", "setuptools"]
 drf-spectacular = ["drf-spectacular"]
 
-[tool.poetry.dev-dependencies]
-coverage = { extras = ["toml"], version = "^6" }
-Faker = "*"
-pre-commit = "*"
-pylint = "*"
-pytest = "*"
-pytest-django = "*"
+[project.urls]
+Homepage = "https://github.com/snok/drf-openapi-tester"
+Documentation = "https://github.com/snok/drf-openapi-tester"
+Repository = "https://github.com/snok/drf-openapi-tester"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
-
-[tool.black]
-line-length = 120
-preview = true
-quiet = true
-include = '\.pyi?$'
-
-[tool.isort]
-profile = "black"
-line_length = 120
-
-[tool.pylint.FORMAT]
-max-line-length = 120
-
-[tool.pylint.MESSAGE_CONTROL]
-disable = """
-    unsubscriptable-object,
-    unnecessary-pass,
-    missing-function-docstring,
-    import-outside-toplevel,
-    fixme,
-    line-too-long,
-"""
-enable = "useless-suppression"
-
-[tool.pylint.DESIGN]
-max-args = 6
-max-returns = 21
-max-branches = 20
-max-locals = 20
-
-[tool.pylint.BASIC]
-good-names = "_,e,i"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.coverage.run]
 source = [
@@ -127,5 +83,53 @@ exclude_lines = [
     "if TYPE_CHECKING:",
 ]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["openapi_tester"]
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "test_project.settings"
+
+[tool.ruff]
+line-length = 120
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "A",
+    "B",
+    "C4",
+    "E",
+    "F",
+    "G",
+    "I",
+    "ICN",
+    "INP",
+    "INT",
+    "ISC",
+    "LOG",
+    "PIE",
+    "PT",
+    "Q",
+    "RET",
+    "RSE",
+    "SIM",
+    "T20",
+    "TCH",
+    "TCH",
+    "W",
+    "YTT",
+]
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "coverage[toml] >=6,<7",
+    "Faker",
+    "pre-commit",
+    "pylint",
+    "pytest",
+    "pytest-django",
+]
