@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import json
 import re
+from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -133,7 +134,7 @@ def validate_pattern(schema_section: dict[str, Any], data: str) -> str | None:
 
 def validate_multiple_of(schema_section: dict[str, Any], data: int | float) -> str | None:
     multiple = schema_section.get("multipleOf")
-    if multiple and data % multiple != 0:
+    if multiple and Decimal(str(data)) % Decimal(str(multiple)) != 0:
         return VALIDATE_MULTIPLE_OF_ERROR.format(data=data, multiple=multiple)
     return None
 

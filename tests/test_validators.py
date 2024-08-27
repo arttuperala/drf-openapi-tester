@@ -320,6 +320,20 @@ def test_multiple_of_validation():
             tester.test_schema_section(schema, num + 2)
 
 
+def test_multiple_of_validation_decimal():
+    # Pass
+    for multiple_of in [0.01, 0.001, 0.0001]:
+        schema = {"multipleOf": multiple_of, "type": "number"}
+        for number in [0.01, 0.05, 0.1, 0.11, 0.20]:
+            tester.test_schema_section(schema, number)
+
+    # Fail
+    with pytest.raises(
+        DocumentationError, match=VALIDATE_MULTIPLE_OF_ERROR.format(data="0.001", multiple="0.01")
+    ):
+        tester.test_schema_section({"multipleOf": 0.01, "type": "number"}, 0.001)
+
+
 def test_unique_items_validation():
     schema = {"type": "array", "items": {"type": "string"}, "uniqueItems": True}
     with pytest.raises(DocumentationError):
